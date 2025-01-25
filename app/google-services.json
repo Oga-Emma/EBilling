@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "865909460736",
+    "project_id": "ebiling",
+    "storage_bucket": "ebiling.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:865909460736:android:bb358d7979eb528ac52de5",
+        "android_client_info": {
+          "package_name": "app.seven.ebilling"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBULi1XilLLu47aeAoBboDfKdbg-7vc1dE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
