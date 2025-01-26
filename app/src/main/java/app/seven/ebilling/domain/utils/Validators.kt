@@ -10,8 +10,8 @@ fun isValidPhoneNumber(phone: String): Boolean {
 
 fun removeCountryCode(phone: String?): String {
     if (phone == null) return ""
-   return if (phone.contains("234")) {
-      phone.replace("234", "0")
+   return if (phone.startsWith("+234")) {
+      phone.replaceFirst("+234", "0")
    } else {
       phone
    }
@@ -20,7 +20,7 @@ fun removeCountryCode(phone: String?): String {
 fun addCountryCode(phone: String?): String {
     if (phone == null) return ""
    return if (phone.startsWith("0")) {
-      phone.replace("0", "234")
+      phone.replaceFirst("0", "+234")
    } else {
       phone
    }

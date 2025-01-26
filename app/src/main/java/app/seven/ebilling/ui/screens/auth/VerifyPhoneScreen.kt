@@ -21,10 +21,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import app.seven.ebilling.ui.core.components.ETextField
 import app.seven.ebilling.ui.core.theme.EBillingTheme
 
 @Composable
@@ -44,11 +46,14 @@ fun VerifyPhoneScreen(
         Spacer(modifier = Modifier.height(24.dp))
         Text("Please verify your phone number with the code sent to ${authViewModel.phoneNumberState}.")
         Spacer(modifier = Modifier.height(48.dp))
-        OutlinedTextField(
+        ETextField(
             modifier = Modifier.fillMaxWidth(),
+            textFieldModifier = Modifier.fillMaxWidth(),
             value = otp,
             onValueChange = { otp = it },
-            label = { Text("OTP") },
+            label = "OTP",
+            keyboardType = KeyboardType.Number,
+            errorMessage = ""
         )
         Spacer(modifier = Modifier.height(48.dp))
         Button(

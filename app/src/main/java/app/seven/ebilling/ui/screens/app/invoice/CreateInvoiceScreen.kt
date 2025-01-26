@@ -70,6 +70,7 @@ import androidx.compose.ui.window.PopupProperties
 import app.seven.ebilling.domain.models.Invoice
 import app.seven.ebilling.domain.models.formattedString
 import app.seven.ebilling.domain.utils.addCountryCode
+import app.seven.ebilling.domain.utils.convertMillisToDate
 import app.seven.ebilling.domain.utils.isValidPhoneNumber
 import app.seven.ebilling.domain.utils.removeCountryCode
 import app.seven.ebilling.ui.core.components.ETextField
@@ -369,7 +370,7 @@ fun InvoiceItemWidget(
                     text = item.description,
                     fontWeight = FontWeight.Bold,
                 )
-                Text("NGN ${item.totalPrice}", fontWeight = FontWeight.Bold)
+                Text(item.formattedPrice, fontWeight = FontWeight.Bold)
             }
             Row {
                 Text(
@@ -498,11 +499,6 @@ fun CreateInvoiceHeaderItem(
             color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
         )
     }
-}
-
-fun convertMillisToDate(millis: Long): String {
-    val formatter = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
-    return formatter.format(Date(millis))
 }
 
 @Composable

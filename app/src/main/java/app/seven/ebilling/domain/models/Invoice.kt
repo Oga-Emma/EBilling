@@ -1,11 +1,10 @@
 package app.seven.ebilling.domain.models
 
 import app.seven.ebilling.domain.utils.titlecase
-import java.time.LocalDate
 import java.util.UUID
 
 data class Invoice(
-    val id: UUID = UUID.randomUUID(),
+    val id: String = UUID.randomUUID().toString(),
     val status: Status = Status.PENDING,
     val issueDate: Long? = null,
     val dueDate: Long? = null,
@@ -13,26 +12,38 @@ data class Invoice(
     val paymentMode: PaymentMode? = null,
     val senderPhone: String? = null,
     val receiverPhone: String? = null,
+    val amountPaid: Int = 0
 ) {
     companion object {
         fun create() = Invoice()
     }
 
+    val total: Int
+        get() = items.sumOf { it.totalPrice }
+
+    val isPaid: Boolean
+        get() = amountPaid >= total
+
+    val formattedPrice: String
+        get() = "₦$total"
+
+    val formattedBalance: String
+        get() = "₦${total - amountPaid}"
+
     data class InvoiceItem(
-        val id: UUID = UUID.randomUUID(),
-        val description: String,
-        val quantity: Int,
-        val price: Int
+        val id: String = UUID.randomUUID().toString(),
+        val description: String = "",
+        val quantity: Int = 1,
+        val price: Int = 1
     ) {
         val totalPrice: Int
             get() = quantity * price
 
+        val formattedPrice: String
+            get() = "₦$totalPrice"
+
         companion object {
-            fun create() = InvoiceItem(
-                description = "",
-                quantity = 1,
-                price = 1
-            )
+            fun create() = InvoiceItem()
         }
     }
 

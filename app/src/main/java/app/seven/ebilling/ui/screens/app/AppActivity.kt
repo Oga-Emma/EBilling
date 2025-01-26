@@ -19,7 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Dashboard
-import androidx.compose.material.icons.outlined.Drafts
+import androidx.compose.material.icons.outlined.CreditCard
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -43,17 +43,20 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import app.seven.ebilling.domain.models.Invoice
+import app.seven.ebilling.domain.models.Wallet
 import app.seven.ebilling.domain.utils.titlecase
 import app.seven.ebilling.ui.core.components.ObserveAsEvents
 import app.seven.ebilling.ui.core.theme.EBillingTheme
 import app.seven.ebilling.ui.screens.app.home.HomeScreen
 import app.seven.ebilling.ui.screens.app.invoice.CreateInvoiceScreen
-import app.seven.ebilling.ui.screens.app.invoice.DraftInvoiceScreen
+import app.seven.ebilling.ui.screens.app.wallet.WalletInvoiceScreen
 import app.seven.ebilling.ui.screens.app.invoice.InvoiceDetailsScreen
 import app.seven.ebilling.ui.screens.app.payment.CreditCardScreen
 import app.seven.ebilling.ui.screens.app.profile.CompleteProfileScreen
@@ -86,8 +89,8 @@ sealed class AppScreens(open val route: String, open val title: String) {
     object Home :
         BottomNavScreen(route = "home", title = "Home", icon = Icons.Default.Dashboard)
 
-    object Draft :
-        BottomNavScreen(route = "draft", title = "Draft", icon = Icons.Outlined.Drafts)
+    object Wallet :
+        BottomNavScreen(route = "wallet", title = "Wallet", icon = Icons.Outlined.CreditCard)
 
     object Profile :
         BottomNavScreen(route = "profile", title = "Profile", icon = Icons.Outlined.Person)
@@ -141,7 +144,7 @@ fun AppView(
     navController: NavHostController = rememberNavController(),
     bottomNavigationItems: List<AppScreens.BottomNavScreen> = listOf(
         AppScreens.Home,
-        AppScreens.Draft,
+        AppScreens.Wallet,
         AppScreens.Profile,
     )
 ) {
@@ -158,33 +161,36 @@ fun AppView(
     val context = LocalContext.current
     ObserveAsEvents(events = appViewModel.events) { event ->
         when (event) {
-            AppViewModel.AppUIEvent.Loading ->
+            AppUIEvent.Loading ->
                 navController.navigate(AppScreens.Loading.route)
 
-            AppViewModel.AppUIEvent.CompleteProfile ->
+            AppUIEvent.CompleteProfile ->
                 navController.navigate(AppScreens.AccountSetup.route)
 
-            AppViewModel.AppUIEvent.CreateInvoice ->
+            AppUIEvent.CreateInvoice ->
                 navController.navigate(AppScreens.CreateInvoice.route)
 
-            AppViewModel.AppUIEvent.Home ->
+            AppUIEvent.Home ->
                 navController.navigate(AppScreens.Home.route)
 
-            AppViewModel.AppUIEvent.Logout -> {
+            AppUIEvent.Logout -> {
                 context.startActivity(Intent(context, AuthActivity::class.java).also {
                     it.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                 })
             }
 
-            is AppViewModel.AppUIEvent.ViewInvoice -> TODO()
-            is AppViewModel.AppUIEvent.Message -> Toast.makeText(
+            is AppUIEvent.ViewInvoice -> TODO()
+            is AppUIEvent.Message -> Toast.makeText(
                 context,
                 event.message,
                 Toast.LENGTH_LONG
             ).show()
 
-            AppViewModel.AppUIEvent.Back ->
+            AppUIEvent.Back ->
                 navController.navigateUp()
+
+            AppUIEvent.InvoiceDetails ->
+                navController.navigate(AppScreens.InvoiceDetails.route)
         }
     }
 
@@ -258,10 +264,37 @@ fun AppView(
                 )
             }
             composable(route = AppScreens.Home.route) {
-                HomeScreen(onItemSelected = { navController.navigate(AppScreens.InvoiceDetails.route) })
+                LaunchedEffect(Unit) {
+                    appViewModel.loadInvoices() // Load data when the screen is composed
+                }
+
+                val invoiceState by appViewModel.state.collectAsStateWithLifecycle()
+
+                if (invoiceState.isLoading) {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                    ) {
+                        CircularProgressIndicator()
+                    }
+
+                } else {
+                    HomeScreen(
+                        onItemSelected = appViewModel::invoiceSelected,
+                        selectedIndex = appViewModel.selectedIndex,
+                        onIndexSelected = {
+                            appViewModel.selectedIndex = it
+                        },
+                        invoiceState = invoiceState
+                    )
+
+                }
             }
-            composable(route = AppScreens.Draft.route) {
-                DraftInvoiceScreen()
+            composable(route = AppScreens.Wallet.route) {
+                WalletInvoiceScreen(
+                    wallet = Wallet(balance = 2000)
+                )
             }
             composable(route = AppScreens.EditProfile.route) {
                 EditProfileScreen(
@@ -294,7 +327,11 @@ fun AppView(
                 Box { }
             }
             composable(route = AppScreens.InvoiceDetails.route) {
-                InvoiceDetailsScreen()
+                val invoiceState by appViewModel.state.collectAsStateWithLifecycle()
+                InvoiceDetailsScreen(
+                    myPhoneNumber = appViewModel.userPhoneNumber,
+                    invoice = invoiceState.selectedInvoice ?: Invoice.create()
+                )
             }
         }
     }
