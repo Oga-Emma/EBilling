@@ -1,5 +1,6 @@
 package app.seven.ebilling.ui.screens.app.wallet
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -131,7 +132,8 @@ fun WalletBalanceArea(modifier: Modifier = Modifier, wallet: Wallet) {
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
                 containerColor = Color.Gray.copy(alpha = 0.2f)
-            )
+            ),
+            border = BorderStroke(width = 1.dp, color = Color.Gray)
         ) {
             Column(
                 modifier = Modifier.padding(16.dp)
@@ -167,7 +169,8 @@ fun BalanceArea(modifier: Modifier = Modifier, amount: Int, label: String, backg
         modifier = modifier,
         colors = CardDefaults.cardColors(
             containerColor = backgroundColor.copy(alpha = 0.2f)
-        )
+        ),
+        border = BorderStroke(width = 1.dp, color = backgroundColor)
     ) {
         Column(
             modifier = Modifier.padding(16.dp)

@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -41,12 +42,18 @@ fun InvoiceList(
         modifier = modifier
             .fillMaxSize()
     ) {
-        stickyHeader { HeaderItem("UNPAID") }
+        stickyHeader {
+            HeaderItem(
+                modifier = Modifier
+                    .padding(horizontal = 8.dp), label = "Unpaid"
+            )
+        }
         if (unpaid.isEmpty()) {
             item {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .padding(horizontal = 8.dp)
                         .padding(bottom = 4.dp)
                         .border(
                             width = 1.dp,
@@ -67,15 +74,22 @@ fun InvoiceList(
 
         items(unpaid) { it ->
             InvoiceListItem(
+                modifier = Modifier.padding(horizontal = 8.dp),
                 invoice = it,
                 onItemSelected = { onItemSelected(it) })
         }
-        stickyHeader { HeaderItem("PAID") }
+        stickyHeader {
+            HeaderItem(
+                modifier = Modifier
+                    .padding(horizontal = 8.dp), label = "Paid"
+            )
+        }
         if (paid.isEmpty()) {
             item {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .padding(8.dp)
                         .padding(bottom = 4.dp)
                         .border(
                             width = 1.dp,
@@ -95,6 +109,7 @@ fun InvoiceList(
         }
         items(paid) { it ->
             InvoiceListItem(
+                modifier = Modifier.padding(horizontal = 8.dp),
                 invoice = it,
                 onItemSelected = { onItemSelected(it) })
         }
@@ -108,19 +123,16 @@ fun InvoiceList(
 fun HeaderItem(label: String, modifier: Modifier = Modifier) {
     Column(
         modifier = Modifier
-            .clip(RoundedCornerShape(4.dp))
             .fillMaxWidth()
-            .background(Color.White)
+            .background(color = MaterialTheme.colorScheme.primaryContainer)
     ) {
-        HorizontalDivider()
         Text(
             modifier = modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp, horizontal = 8.dp),
             text = label,
-            textAlign = TextAlign.End
+            textAlign = TextAlign.Start
         )
-        HorizontalDivider()
     }
 }
 

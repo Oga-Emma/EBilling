@@ -87,7 +87,7 @@ sealed class AppScreens(open val route: String, open val title: String) {
         AppScreens(route = "create-invoice", title = "Create Invoice")
 
     object Home :
-        BottomNavScreen(route = "home", title = "Home", icon = Icons.Default.Dashboard)
+        BottomNavScreen(route = "home", title = "EBilling", icon = Icons.Default.Dashboard)
 
     object Wallet :
         BottomNavScreen(route = "wallet", title = "Wallet", icon = Icons.Outlined.CreditCard)

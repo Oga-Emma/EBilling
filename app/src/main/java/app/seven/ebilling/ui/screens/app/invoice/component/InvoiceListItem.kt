@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -36,7 +37,7 @@ import app.seven.ebilling.domain.utils.removeCountryCode
 fun InvoiceListItem(modifier: Modifier = Modifier, onItemSelected: () -> Unit, invoice: Invoice) {
     Card(
         modifier = modifier.padding(vertical = 4.dp),
-        border = BorderStroke(width = 1.dp, color = Color.LightGray.copy(0.5f)),
+        border = BorderStroke(width = 2.dp, color = MaterialTheme.colorScheme.primary.copy(0.5f)),
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 0.dp
@@ -108,7 +109,11 @@ fun InvoiceListItem(modifier: Modifier = Modifier, onItemSelected: () -> Unit, i
                             )
                         }
                     }
-                    Text("Due: ${convertMillisToDate(invoice.dueDate!!)}", color = Color.Gray, fontSize = 12.sp)
+                    Text(
+                        "Due: ${convertMillisToDate(invoice.dueDate!!)}",
+                        color = Color.Gray,
+                        fontSize = 12.sp
+                    )
                 }
             }
         }

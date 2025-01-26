@@ -43,11 +43,10 @@ fun HomeScreen(
         )
         InvoiceList(
             modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 8.dp),
+                .weight(1f),
             invoiceList = if (selectedIndex == 0) {
-                invoiceState.sentInvoiceList
-            } else invoiceState.receivedInvoiceList,
+                invoiceState.receivedInvoiceList
+            } else invoiceState.sentInvoiceList,
             onItemSelected = onItemSelected
         )
     }
@@ -56,28 +55,28 @@ fun HomeScreen(
 @Composable
 fun InvoiceTabs(selectedIndex: Int, onSelectTab: (Int) -> Unit) {
 
-    val list = listOf("INVOICES SENT", "INVOICES RECEIVED")
+    val list = listOf("INVOICES RECEIVED", "INVOICES SENT")
 
     TabRow(selectedTabIndex = selectedIndex,
 //        backgroundColor = Color(0xff1E76DA),
 
         modifier = Modifier
             .padding(4.dp)
-            .border(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.primaryContainer,
-                shape = RoundedCornerShape(4.dp)
-            )
+//            .border(
+//                width = 1.dp,
+//                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+//                shape = RoundedCornerShape(4.dp)
+//            )
             .clip(RoundedCornerShape(4.dp)),
-        indicator = { Box {} },
+//        indicator = { Box {} },
         divider = { Box {} }
     ) {
         list.forEachIndexed { index, text ->
             val selected = selectedIndex == index
             Tab(
-                modifier = if (!selected) Modifier
-                else Modifier
-                    .background(MaterialTheme.colorScheme.primaryContainer),
+//                modifier = if (!selected) Modifier
+//                else Modifier
+//                    .background(MaterialTheme.colorScheme.primaryContainer),
                 selected = selected,
                 onClick = {
                     if (selectedIndex != index) {

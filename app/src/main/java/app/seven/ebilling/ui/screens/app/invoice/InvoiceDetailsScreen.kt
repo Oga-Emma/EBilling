@@ -46,19 +46,19 @@ import kotlinx.coroutines.launch
 fun InvoiceDetailsScreen(modifier: Modifier = Modifier, invoice: Invoice, myPhoneNumber: String) {
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
-    var showBottomSheet by remember { mutableStateOf(false) }
+    var amountToPay by remember { mutableStateOf<Int?>(null) }
 
-    if (showBottomSheet) {
+    if (amountToPay != null) {
         ModalBottomSheet(
             onDismissRequest = {
-                showBottomSheet = false
+                amountToPay = null
             },
             sheetState = sheetState
         ) {
             Column {
                 Text(
                     modifier = Modifier.padding(horizontal = 16.dp),
-                    text = "Amount: ${invoice.formattedPrice}",
+                    text = "Amount: $amountToPay",
                     fontWeight = FontWeight.Bold
                 )
                 CreditCardForm()
@@ -71,7 +71,7 @@ fun InvoiceDetailsScreen(modifier: Modifier = Modifier, invoice: Invoice, myPhon
                     onClick = {
                         scope.launch { sheetState.hide() }.invokeOnCompletion {
                             if (!sheetState.isVisible) {
-                                showBottomSheet = false
+                                amountToPay = null
                             }
                         }
                     }
@@ -109,57 +109,84 @@ fun InvoiceDetailsScreen(modifier: Modifier = Modifier, invoice: Invoice, myPhon
             text = "PAYMENT SUMMARY",
             fontWeight = FontWeight.Bold
         )
+//        HorizontalDivider(
+//            modifier = Modifier.padding(vertical = 8.dp),
+//            color = Color.LightGray.copy(alpha = 0.5f)
+//        )
+//        Spacer(modifier = Modifier.height(16.dp))
+//        Text(
+//            text = "Paid 3 of 4 Installments",
+//        )
         HorizontalDivider(
             modifier = Modifier.padding(vertical = 8.dp),
             color = Color.LightGray.copy(alpha = 0.5f)
         )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "Paid 3 of 4 Installments",
-        )
-        HorizontalDivider(
-            modifier = Modifier.padding(vertical = 8.dp),
-            color = Color.LightGray.copy(alpha = 0.5f)
-        )
-        Spacer(modifier = Modifier.height(8.dp))
+//        Spacer(modifier = Modifier.height(8.dp))
         MoneySummaryArea(invoice = invoice)
         Spacer(modifier = Modifier.height(24.dp))
 
         if (myPhoneNumber != invoice.senderPhone)
             ButtonArea(
+                invoice = invoice,
                 onMakePayment = {
-                    showBottomSheet = true
+                    amountToPay = it
                 }
             )
     }
 }
 
 @Composable
-fun ButtonArea(modifier: Modifier = Modifier, onMakePayment: () -> Unit) {
-    Column {
-        Button(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp),
-            shape = RoundedCornerShape(4.dp),
-            onClick = {
-                onMakePayment()
-            }
+fun ButtonArea(modifier: Modifier = Modifier, invoice: Invoice, onMakePayment: (Int) -> Unit) {
+    if (invoice.paymentMode != Invoice.PaymentMode.ONE_INSTALLMENT) {
+        Column(
+            modifier = modifier
         ) {
-            Text("Make Full Payment")
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        OutlinedButton(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp),
-            shape = RoundedCornerShape(4.dp),
-            onClick = {
-                onMakePayment()
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                shape = RoundedCornerShape(4.dp),
+                onClick = {
+                    onMakePayment(
+                        invoice.total
+                    )
+                }
+            ) {
+                Text("Pay Now")
             }
-        ) {
-            Text("Pay Next Installment")
         }
+    } else {
+        Column(
+            modifier = modifier
+        ) {
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                shape = RoundedCornerShape(4.dp),
+                onClick = {
+                    onMakePayment(
+                        invoice.total - invoice.amountPaid
+                    )
+                }
+            ) {
+                Text("Make Full Payment")
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedButton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                shape = RoundedCornerShape(4.dp),
+                onClick = {
+
+                    onMakePayment(
+                        invoice.total / getInstallment(invoice)
+                    )
+                }
+            ) {
+                Text("Pay Next Installment")
+            }
 //        Spacer(modifier = Modifier.height(8.dp))
 //        Row {
 //            OutlinedButton(
@@ -184,12 +211,21 @@ fun ButtonArea(modifier: Modifier = Modifier, onMakePayment: () -> Unit) {
 //                Text("Send Invoice")
 //            }
 //        }
+        }
     }
 }
 
 @Composable
 fun MoneySummaryArea(modifier: Modifier = Modifier, invoice: Invoice) {
     Column {
+        SummaryItem(
+            label = "Installments",
+            value = "${getCurrentInstallment(invoice) + 1} of ${getInstallment(invoice)}"
+        )
+        HorizontalDivider(
+            modifier = Modifier.padding(vertical = 8.dp),
+            color = Color.LightGray.copy(alpha = 0.5f)
+        )
         SummaryItem(label = "Total", value = "${invoice.total}")
         Spacer(modifier = Modifier.height(8.dp))
         SummaryItem(label = "Amount Paid", value = "${invoice.amountPaid}")
@@ -344,6 +380,7 @@ fun InvoiceItemsDetails(modifier: Modifier = Modifier, items: List<Invoice.Invoi
     }
 }
 
+
 @Preview
 @Composable
 private fun InvoiceDetailsScreenPreview() {
@@ -358,3 +395,21 @@ private fun InvoiceDetailsScreenPreview() {
         }
     }
 }
+
+fun getInstallment(invoice: Invoice) = when (invoice.paymentMode) {
+    Invoice.PaymentMode.ONE_INSTALLMENT -> 1
+    Invoice.PaymentMode.TWO_INSTALLMENT -> 2
+    Invoice.PaymentMode.THREE_INSTALLMENT -> 3
+    Invoice.PaymentMode.FOUR_INSTALLMENT -> 4
+    null -> 1
+}
+
+fun getCurrentInstallment(invoice: Invoice): Int {
+    if (invoice.isPaid) return 0
+    if (invoice.amountPaid <= 0) return 0
+
+    val totalInstallment = getInstallment(invoice)
+    val amountPerInstallment = invoice.total / totalInstallment
+    return (invoice.amountPaid / amountPerInstallment)
+}
+
